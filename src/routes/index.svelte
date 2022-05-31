@@ -44,6 +44,7 @@
         return ipaddresses;
     };
 
+    const getTimeZoneName = (dateString) => dateString.substring(dateString.length - 7, dateString.length - 1).trim();
 
 </script>
 
@@ -70,7 +71,7 @@
                             <li>Postal Code: {value.postal}</li>
                             <li>Country: {value.country}</li>
                             <li>Date: {value.date}</li>
-                            <li>Is Same Timezone: {value.timezone === clientTimeZone}</li>
+                            <li>Is Same Timezone: {getTimeZoneName(value.date) === getTimeZoneName(clientFormatter.format(clientDate))}</li>
                         </ul>
                     </li>
                 {/await}
