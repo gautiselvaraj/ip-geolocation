@@ -6,21 +6,10 @@
     let clientDate = null;
     let clientTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     let clientFormatter = new Intl.DateTimeFormat([], { dateStyle: 'full', timeStyle: 'long' });
-    let geolocation = null;
     let promise = null;
 
     onMount(() => {
         clientDate = new Date();
-        navigator.geolocation.getCurrentPosition((pos) => {
-            geolocation = pos;
-        }, (err) => {
-            console.warn(err.code + ": " + err.message);
-        }, {
-            enableHighAccuracy: true,
-            timeout: 3000,
-            maximumAge: 0
-        });
-
         promise = getIPTypes().then(async res => getIPDetails(res));
     });
 
@@ -61,15 +50,6 @@
 {#if clientDate !== null}
 <p>Client OS Date: {clientFormatter.format(clientDate)}</p>
 <p>Client Timezone: {clientTimeZone}</p>
-{/if}
-<br />
-{#if geolocation !== null} 
-    <p>Location at {clientFormatter.format(new Date(geolocation.timestamp))} :</p>
-    <ul>
-        <li>Longitude: {geolocation.coords.longitude}</li>
-        <li>Latitude: {geolocation.coords.latitude}</li>
-        <li>Accuracy: within {geolocation.coords.accuracy} meters</li>
-    </ul>
 {/if}
 <br />
 {#await promise then ipaddresses} 
