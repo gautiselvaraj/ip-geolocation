@@ -1,6 +1,6 @@
 <script>
     import { onMount } from 'svelte';
-    import * as tzloopup from 'tz-lookup';
+    import * as tzlookup from 'tz-lookup';
     import { IPAddress } from '$lib/scripts/lib.js';
 
     let clientDate = null;
@@ -28,7 +28,7 @@
             let detail = await fetch('https://geolocation-db.com/json/' + ipaddress.ip)
                          .then(response => response.json())
                          .then(data => {
-                                        const timezone = tzloopup(data.latitude, data.longitude);
+                                        const timezone = tzlookup(data.latitude, data.longitude);
                                         const option = {
                                             timeZone: timezone,
                                             year: 'numeric',
