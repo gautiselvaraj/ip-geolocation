@@ -1,11 +1,15 @@
 <script>
     import { onMount } from 'svelte';
+    import * as tzloopup from 'tz-lookup';
+    import { IPAddress } from '$lib/scripts/lib.js';
 
-    let clientDate = new Date();
+    let clientDate = null;
+    let clientTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     let geolocation = null;
-    let ipaddresses = [];
+    let promise = null;
 
     onMount(() => {
+        clientDate = new Date();
         navigator.geolocation.getCurrentPosition((pos) => {
             geolocation = pos;
         }, (err) => {
@@ -16,13 +20,51 @@
             maximumAge: 0
         });
 
-        getIPTypes().then((res) => {
-            ipaddresses = res;
-        });
+        promise = getIPTypes().then(async res => getIPDetails(res));
     });
+
+    const getIPDetails = async (res) => {
+        let ipaddresses = await res.map(async (ipaddress) => {
+            let detail = await fetch('https://geolocation-db.com/json/' + ipaddress.ip)
+                         .then(response => response.json())
+                         .then(data => {
+                                        const timezone = tzloopup(data.latitude, data.longitude);
+                                        const option = {
+                                            timeZone: timezone,
+                                            year: 'numeric',
+                                            month: 'numeric',
+                                            day: 'numeric',
+                                            hour: 'numeric',
+                                            minute: 'numeric',
+                                            second: 'numeric',
+                                        };
+                                        const formatter = new Intl.DateTimeFormat([], option);
+                                        return new IPAddress(ipaddress.ip, 
+                                                                    ipaddress.IPv4 ? "IPv4" : "IPv6", 
+                                                                    data.latitude,
+                                                                    data.longitude,
+                                                                    timezone,
+                                                                    data.state,
+                                                                    data.city,
+                                                                    data.postal,
+                                                                    data.country_name,
+                                                                    new Date(formatter.format(clientDate))
+                                                            );
+                                    }
+                                );
+            return detail;
+        });
+
+        return ipaddresses;
+    };
+
+
 </script>
 
+{#if clientDate !== null}
 <p>Client OS Date: {clientDate}</p>
+<p>Client Timezone: {clientTimeZone}</p>
+{/if}
 <br />
 {#if geolocation !== null} 
     <p>Location at {new Date(geolocation.timestamp)} :</p>
@@ -33,11 +75,29 @@
     </ul>
 {/if}
 <br />
-{#if ipaddresses !== null} 
+{#await promise then ipaddresses} 
     <p>Available Client IP Addresses: </p>
     <ul>
-        {#each ipaddresses as ipaddress}
-            <li>{ipaddress.ip} - {ipaddress.type} - {ipaddress.IPv4 ? "IPv4" : "IPv6"}</li>
-        {/each}
+        {#if ipaddresses !== null}
+            {#each ipaddresses as ipaddress}
+                {#await ipaddress then value}
+                    <li>
+                        <span>{value.ipaddress}</span>
+                        <ul>
+                            <li>Type: {value.type}</li>
+                            <li>Lattitude: {value.lattitude}</li>
+                            <li>Longitude: {value.longitude}</li>
+                            <li>Timezone: {value.timezone}</li>
+                            <li>State: {value.state}</li>
+                            <li>City: {value.city}</li>
+                            <li>Postal Code: {value.postal}</li>
+                            <li>Country: {value.country}</li>
+                            <li>Date: {value.date}</li>
+                            <li>Is Same Timezone: {value.timezone === clientTimeZone}</li>
+                        </ul>
+                    </li>
+                {/await}
+            {/each}
+        {/if}
     </ul>
-{/if}
+{/await}
