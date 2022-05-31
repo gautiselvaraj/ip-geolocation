@@ -1,6 +1,6 @@
 <script>
     import { onMount } from 'svelte';
-    import * as tzlookup from 'tz-lookup';
+    import tzlookup from 'tz-lookup';
     import { IPAddress } from '$lib/scripts/lib.js';
 
     let clientDate = null;
