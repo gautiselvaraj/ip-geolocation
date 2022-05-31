@@ -44,7 +44,7 @@
         return ipaddresses;
     };
 
-    const getTimeZoneName = (dateString) => dateString.substring(dateString.length - 7, dateString.length - 1).trim();
+    const getTimeZoneName = (dateString) => dateString.substring(dateString.length - 6, dateString.length).trim();
 
 </script>
 
