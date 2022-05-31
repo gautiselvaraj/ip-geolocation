@@ -16,7 +16,7 @@
             maximumAge: 0
         });
 
-        getIPs().then((res) => {
+        getIPTypes().then((res) => {
             ipaddresses = res;
         });
     });
@@ -37,7 +37,7 @@
     <p>Available Client IP Addresses: </p>
     <ul>
         {#each ipaddresses as ipaddress}
-            <li>{ipaddress}</li>
+            <li>{ipaddress.ip} - {ipaddress.type} - {ipaddress.IPv4 ? "IPv4" : "IPv6"}</li>
         {/each}
     </ul>
 {/if}
