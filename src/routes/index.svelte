@@ -5,6 +5,7 @@
 
     let clientDate = null;
     let clientTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    let clientFormatter = new Intl.DateTimeFormat([], { dateStyle: 'full', timeStyle: 'long' });
     let geolocation = null;
     let promise = null;
 
@@ -31,12 +32,8 @@
                                         const timezone = tzlookup(data.latitude, data.longitude);
                                         const option = {
                                             timeZone: timezone,
-                                            year: 'numeric',
-                                            month: 'numeric',
-                                            day: 'numeric',
-                                            hour: 'numeric',
-                                            minute: 'numeric',
-                                            second: 'numeric',
+                                            dateStyle: 'full',
+                                            timeStyle: 'long'
                                         };
                                         const formatter = new Intl.DateTimeFormat([], option);
                                         return new IPAddress(ipaddress.ip, 
@@ -48,7 +45,7 @@
                                                                     data.city,
                                                                     data.postal,
                                                                     data.country_name,
-                                                                    new Date(formatter.format(clientDate))
+                                                                    formatter.format(clientDate)
                                                             );
                                     }
                                 );
@@ -62,12 +59,12 @@
 </script>
 
 {#if clientDate !== null}
-<p>Client OS Date: {clientDate}</p>
+<p>Client OS Date: {clientFormatter.format(clientDate)}</p>
 <p>Client Timezone: {clientTimeZone}</p>
 {/if}
 <br />
 {#if geolocation !== null} 
-    <p>Location at {new Date(geolocation.timestamp)} :</p>
+    <p>Location at {clientFormatter.format(new Date(geolocation.timestamp))} :</p>
     <ul>
         <li>Longitude: {geolocation.coords.longitude}</li>
         <li>Latitude: {geolocation.coords.latitude}</li>
